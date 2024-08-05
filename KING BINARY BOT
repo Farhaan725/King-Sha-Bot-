@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KING SHA Bot</title>
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #eaeaea;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2, label {
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .container {
+            background: linear-gradient(145deg, #2e2e38, #39394f);
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-in-out;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            display: none;
+        }
+        #passwordPrompt {
+            display: block;
+        }
+        input, select, button {
+            background-color: #444;
+            color: #eaeaea;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        input:focus, select:focus, button:focus {
+            outline: none;
+            background-color: #555;
+        }
+        button:hover {
+            background-color: #666;
+            transform: scale(1.05);
+        }
+        #signalBox {
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 20px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 2px solid #fff;
+        }
+        .call {
+            background-color: green;
+        }
+        .put {
+            background-color: red;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+            animation: float 3s infinite;
+        }
+        @keyframes float {
+            0% {
+                transform: translatey(0px);
+            }
+            50% {
+                transform: translatey(-20px);
+            }
+            100% {
+                transform: translatey(0px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="passwordPrompt" class="container">
+    <div class="logo">
+       <a href="https://t.me/FarhaanSha/"><img src="https://i.ibb.co/7XgfMr3/Untitled4-20240805154209.jpg" alt="Untitled4-20240805154209" border="0"></a>
+    </div>
+    <h2>ENTER CODE</h2>
+    <input type="password" id="password" placeholder="CODE">
+    <button onclick="checkPassword()">Submit</button>
+</div>
+
+<div id="mainContent" class="container">
+    <div class="logo"><a href="https://t.me/FarhaanSha/"><img src="https://i.ibb.co/7XgfMr3/Untitled4-20240805154209.jpg" alt="Untitled4-20240805154209" border="0"></a>
+    </div>
+    <h1>Binary Bot</h1>
+    <label for="broker">Select Broker:</label>
+    <select id="broker" onchange="updateAssets()">
+        <option value="forex">Forex</option>
+        <option value="quotex">Quotex</option>
+        <option value="binomo">Binomo</option>
+        <option value="olymptrade">Olymp Trade</option>
+        <option value="iqinvest">IQ Invest</option>
+    </select>
+    <label for="asset">Select Asset:</label>
+    <select id="asset">
+        <option value="eurusd">EUR/USD</option>
+        <!-- Add more assets as needed -->
+    </select>
+    <label for="time">Select Time:</label>
+    <select id="time">
+        <option value="1min">1 Minute</option>
+        <!-- Add more time options as needed -->
+    </select>
+    <button id="generateSignalButton" onclick="generateSignal()">Generate Signal</button>
+    <div id="signalBox">Generating Signal</div>
+</div>
+
+<script>
+    const binomoAssets = [
+        "CRYPTO IDX", "EUR IDX", "ALTCOIN IDX", "SILVER", "GOLD", "LITECOIN"
+    ];
+
+    const iqInvestAssets = [
+        "US 30", "US 100", "US 500", "UK 100", "FR 40", "EU 50", "AUS 200", 
+        "SP 35", "JP 225", "HK 33", "GER 30", "USD CURRENCY INDEX", "JPY CURRENCY INDEX"
+    ];
+
+    const forexPairs = [
+        "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "NZD/USD", "USD/CAD", 
+        "EUR/GBP", "EUR/JPY", "EUR/CHF", "EUR/AUD", "EUR/NZD", "EUR/CAD", "GBP/JPY", 
+        "GBP/CHF", "GBP/AUD", "GBP/NZD", "GBP/CAD", "CHF/JPY", "AUD/JPY", "AUD/CHF", 
+        "AUD/NZD", "AUD/CAD", "NZD/JPY", "NZD/CHF", "NZD/CAD", "CAD/JPY", "CAD/CHF", 
+        "USD/ZAR", "EUR/ZAR", "GBP/ZAR", "ZAR/JPY", "EUR/MXN", "GBP/MXN", "USD/MXN"
+    ];
+
+    const quotexAssets = [
+        "USD/ZAR (OTC)", "USD/CHF (OTC)", "EUR/GBP (OTC)", "AUD/JPY (OTC)", "AUD/USD (OTC)", "AUD/CAD (OTC)", 
+        "EUR/USD (OTC)", "GBP/JPY (OTC)", "GBP/USD (OTC)", "USD/SGD (OTC)", "USD/NOK (OTC)", "GBP/NZD (OTC)", 
+        "NZD/USD (OTC)", "CAD/JPY (OTC)", "USD/PKR (OTC)", "USD/INR (OTC)", "USD/COP (OTC)", "USD/NGN (OTC)", 
+        "USD/BDT (OTC)", "USD/TRY (OTC)", "USD/PHP (OTC)", "USD/IDR (OTC)", "EUR/SGD (OTC)", "USD/BRL (OTC)", 
+        "USD/MXN (OTC)", "USD/EGP (OTC)", "BITCOIN (OTC)", "UK BRENT (OTC)", "US CRUDE (OTC)", "Mc DONALD'S (OTC)", 
+        "FACEBOOK INC (OTC)", "AMERICAN EXPRESS (OTC)", "BOEING COMPANY (OTC)", "INTEL (OTC)", "PFIZER INC (OTC)", 
+        "JOHNSON & JOHNSON (OTC)", "MICROSOFT (OTC)", "DOW JONES (OTC)"
+    ];
+
+    const olympTradeAssets = [
+        "ASIA COMPOSITE INDEX", "ASTRO INDEX", "COMMODITY COMPOSITE INDEX", "CRYPTO COMPOSITE INDEX", 
+        "EUROPE COMPOSITE INDEX", "MAHA JANTAR INDEX", "MOONCH INDEX", "BRENT", "BASIC DOLLAR INDEX", 
+        "CAC 40", "CRICKET COMPOSITE INDEX", "DAX", "DOW JONES", "FTSE 100", "NASDAQ", "NATURAL GAS", 
+        "S&P 500", "SILVER", "GOLD", "BASIC ALTCOIN INDEX", "RUSSELL 2000", "AMAZON", "BOEING", "COCA-COLA", 
+        "DISNEY", "FACEBOOK", "GOOGLE", "GOOGLE C", "JP MORGAN", "MCDONALD'S", "MICROSOFT", "TESLA", "VISA", "APPLE", 
+        "BITCOIN", "EURO STOXX 50", "ETHEREUM", "LITECOIN", "BMW"
+    ];
+
+    function updateAssets() {
+        const broker = document.getElementById('broker').value;
+        const asset = document.getElementById('asset');
+        asset.innerHTML = '';
+
+        let assetOptions = [];
+        if (broker === 'binomo') {
+            assetOptions = binomoAssets;
+        } else if (broker === 'iqinvest') {
+            assetOptions = iqInvestAssets;
+        } else if (broker === 'forex') {
+            assetOptions = forexPairs;
+        } else if (broker === 'quotex') {
+            assetOptions = quotexAssets;
+        } else if (broker === 'olymptrade') {
+            assetOptions = olympTradeAssets;
+        }
+
+        assetOptions.forEach(pair => {
+            const option = document.createElement('option');
+            option.value = pair.replace(/[^\w]/g, '').toLowerCase();
+            option.textContent = pair;
+            asset.appendChild(option);
+        });
+    }
+
+    function checkPassword() {
+        const password = document.getElementById('password').value;
+        if (password === '62348-FM') {
+            localStorage.setItem('passwordVerified', 'true');
+            document.getElementById('passwordPrompt').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            document.getElementById('mainContent').style.flexDirection = 'column';
+            document.getElementById('mainContent').style.alignItems = 'center';
+            updateAssets(); // Ensure assets are correctly populated after password verification
+        } else {
+            alert('Incorrect Code Contact Admin t.me/FarhaanSha');
+        }
+    }
+
+    function generateSignal() {
+        const signalBox = document.getElementById('signalBox');
+        const signals = ['CALL', 'PUT'];
+        const signal = signals[Math.floor(Math.random() * signals.length)];
+        signalBox.innerText = signal;
+        signalBox.className = signal.toLowerCase();
+
+        const generateSignalButton = document.getElementById('generateSignalButton');
+        let timeLeft = 58;
+        generateSignalButton.disabled = true;
+        const timer = setInterval(() => {
+            generateSignalButton.innerText = `Generate Signal (${timeLeft}s)`;
+            timeLeft -= 1;
+            if (timeLeft < 0) {
+                clearInterval(timer);
+                generateSignalButton.disabled = false;
+                generateSignalButton.innerText = 'Generate Signal';
+            }
+        }, 1000);
+    }
+
+    function disableForexOnWeekend() {
+        const today = new Date().getDay();
+        const brokerSelect = document.getElementById('broker');
+        if (today === 6 || today === 0) {  // 6 = Saturday, 0 = Sunday
+            brokerSelect.querySelector('option[value="forex"]').remove();
+        }
+    }
+
+    window.onload = function() {
+        if (localStorage.getItem('passwordVerified') === 'true') {
+            document.getElementById('passwordPrompt').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            document.getElementById('mainContent').style.flexDirection = 'column';
+            document.getElementById('mainContent').style.alignItems = 'center';
+        }
+        disableForexOnWeekend();
+        updateAssets(); // Ensure assets are correctly populated on page load
+    };
+</script>
+
+</body>
+</html>
+
